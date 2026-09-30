@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AWS security audit report</title>
+<style>
+body { font-family: "Segoe UI", Arial, sans-serif; margin: 2rem; color: #1a1a1a; }
+h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+.meta { color: #555; margin-bottom: 1.5rem; }
+.summary { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+.card { border: 1px solid #ddd; border-radius: 8px; padding: 0.75rem 1.25rem; min-width: 110px; }
+.card .n { font-size: 1.75rem; font-weight: 600; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border-bottom: 1px solid #e5e5e5; padding: 0.6rem 0.5rem; text-align: left; vertical-align: top; font-size: 0.9rem; }
+th { background: #f6f6f6; }
+.badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.8rem; }
+.High { background: #fde2e2; color: #8a1c1c; }
+.Medium { background: #fdf0d5; color: #7a4b00; }
+.Low { background: #e3f1e5; color: #1e5b2a; }
+</style>
+</head>
+<body>
+<h1>AWS security audit report</h1>
+<div class="meta">Generated {{ generated }} &middot; Account {{ account }} &middot; Profile {{ profile }} &middot; Region {{ region }}</div>
+
+<div class="summary">
+  {% for level in ["High", "Medium", "Low"] %}
+  <div class="card"><div class="n">{{ counts[level] }}</div><div>{{ level }}</div></div>
+  {% endfor %}
+  <div class="card"><div class="n">{{ findings|length }}</div><div>Total</div></div>
+</div>
+
+{% if findings %}
+<table>
+  <thead>
+    <tr><th>Severity</th><th>Category</th><th>Resource</th><th>Finding</th><th>Recommended fix</th></tr>
+  </thead>
+  <tbody>
+  {% for f in findings %}
+    <tr>
+      <td><span class="badge {{ f.severity }}">{{ f.severity }}</span></td>
+      <td>{{ f.category }}</td>
+      <td>{{ f.resource }}</td>
+      <td>{{ f.description }}</td>
+      <td>{{ f.remediation }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No findings.</p>
+{% endif %}
+</body>
+</html>
