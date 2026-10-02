@@ -32,7 +32,7 @@ def check_bucket_policy_public(s3, bucket_name):
     """Flag if the bucket policy status reports the bucket as public."""
     try:
         status = s3.get_bucket_policy_status(Bucket=bucket_name)
-        if status["PolicyStatus"]["IsPublic"]:
+        if status.get("PolicyStatus", {}).get("IsPublic", False):
             return {
                 "resource": bucket_name,
                 "category": "S3",
