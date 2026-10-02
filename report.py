@@ -66,9 +66,10 @@ def write_html(findings, path, meta, counts):
     path.write_text(html, encoding="utf-8")
 
 
-def write_all(findings, account_id, profile, region, out_dir="reports"):
+def write_all(findings, account_id, profile, region, out_dir="reports",
+              formats=("json", "csv", "html")):
     out = Path(out_dir)
-    out.mkdir(exist_ok=True)
+    out.mkdir(parents=True, exist_ok=True)
     now = datetime.now(timezone.utc)
     stamp = now.strftime("%Y%m%d-%H%M%S")
     counts = summarize(findings)
@@ -78,12 +79,14 @@ def write_all(findings, account_id, profile, region, out_dir="reports"):
         "profile": profile,
         "region": region,
     }
-    paths = {
-        "json": out / f"audit-{stamp}.json",
-        "csv": out / f"audit-{stamp}.csv",
-        "html": out / f"audit-{stamp}.html",
-    }
-    write_json(findings, paths["json"], meta)
-    write_csv(findings, paths["csv"])
-    write_html(findings, paths["html"], meta, counts)
+    paths = {}
+    if "json" in formats:
+        paths["json"] = out / f"audit-{stamp}.json"
+        write_json(findings, paths["json"], meta)
+    if "csv" in formats:
+        paths["csv"] = out / f"audit-{stamp}.csv"
+        write_csv(findings, paths["csv"])
+    if "html" in formats:
+        paths["html"] = out / f"audit-{stamp}.html"
+        write_html(findings, paths["html"], meta, counts)
     return paths
