@@ -1,5 +1,7 @@
 # AWS IAM & Security Audit Tool
 
+![CI](https://github.com/hemant2k5-png/aws-iam-security-audit/actions/workflows/ci.yml/badge.svg)
+
 A Python tool that scans an AWS account for common security misconfigurations and reports each one with a severity and a suggested fix. It uses only read-only AWS API calls, so it can audit an account without being able to change anything in it.
 
 I built this as my first AWS project while learning cloud fundamentals, aiming at cloud support and security-adjacent roles. Every check was tested by deliberately creating the misconfiguration in a sandbox account, confirming the tool caught it, and cleaning it up.
@@ -156,7 +158,7 @@ Save as docs/screenshots/cloudtrail.png, then uncomment the line below.
 
 ## Setup
 
-Requirements: Python 3.11+, AWS CLI v2, and an AWS account you own (use a sandbox, not production).
+Requirements: Python 3.12+, AWS CLI v2, and an AWS account you own (use a sandbox, not production).
 
 ```powershell
 git clone https://github.com/hemanth2k5-png/aws-iam-security-audit.git
