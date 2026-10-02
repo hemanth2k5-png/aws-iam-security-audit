@@ -1,6 +1,6 @@
 # AWS IAM & Security Audit Tool
 
-![CI](https://github.com/hemant2k5-png/aws-iam-security-audit/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/hemanth2k5-png/aws-iam-security-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/hemanth2k5-png/aws-iam-security-audit/actions/workflows/ci.yml)
 
 A Python tool that scans an AWS account for common security misconfigurations and reports each one with a severity and a suggested fix. It uses only read-only AWS API calls, so it can audit an account without being able to change anything in it.
 
