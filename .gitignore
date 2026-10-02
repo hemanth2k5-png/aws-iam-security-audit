@@ -222,4 +222,4 @@ __pycache__/
 *.pyc
 reports/*.html
 reports/*.json
-*.csv
+*.csv*.zip

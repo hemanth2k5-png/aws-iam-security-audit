@@ -1,0 +1,2 @@
+severity,category,resource,description,remediation
+High,IAM Policy,Sai-Admin,User has AdministratorAccess attached directly,"Attach only the specific permissions this user needs, or move broad access to a role assumed only when needed."

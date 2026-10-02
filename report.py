@@ -3,7 +3,6 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from jinja2 import Environment, FileSystemLoader
 
 SEVERITY_ORDER = {"High": 0, "Medium": 1, "Low": 2}
 FIELDS = ["severity", "category", "resource", "description", "remediation"]
@@ -60,6 +59,8 @@ def write_csv(findings, path):
 
 
 def write_html(findings, path, meta, counts):
+    from jinja2 import Environment, FileSystemLoader
+
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)), autoescape=True)
     template = env.get_template("report.html.j2")
     html = template.render(findings=findings, counts=counts, **meta)
