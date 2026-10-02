@@ -1,7 +1,7 @@
 import zipfile
 from pathlib import Path
 
-FILES = ["main.py", "report.py", "lambda_handler.py"]
+FILES = ["main.py", "report.py", "history.py", "lambda_handler.py"]
 OUT = Path("audit-lambda.zip")
 
 with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as zf:

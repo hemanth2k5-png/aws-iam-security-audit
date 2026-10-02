@@ -31,3 +31,18 @@ def test_handler_publishes_summary_to_sns(monkeypatch):
 
     assert result["statusCode"] == 200
     assert result["total"] >= 1
+
+@mock_aws
+def test_handler_saves_history_when_bucket_is_configured(monkeypatch):
+    sns = boto3.client("sns", region_name="us-east-1")
+    topic_arn = sns.create_topic(Name="alerts")["TopicArn"]
+    s3 = boto3.client("s3", region_name="us-east-1")
+    s3.create_bucket(Bucket="history")
+    monkeypatch.setenv("TOPIC_ARN", topic_arn)
+    monkeypatch.setenv("FINDINGS_BUCKET", "history")
+
+    result = lambda_handler.handler({}, None)
+
+    keys = [o["Key"] for o in s3.list_objects_v2(Bucket="history")["Contents"]]
+    assert result["run_id"] is not None
+    assert any(k.startswith("runs/") for k in keys)
