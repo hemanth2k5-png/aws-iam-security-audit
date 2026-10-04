@@ -47,8 +47,7 @@ def collect_findings(session):
     raw += check_all_buckets(s3)
     raw += check_security_groups(ec2)
     raw += check_cloudtrail(cloudtrail)
-    # keep your credential report check here too, for example:
-    # raw += check_credential_report(iam)
+    
     return raw
 
 
