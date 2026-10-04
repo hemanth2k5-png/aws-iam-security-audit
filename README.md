@@ -19,12 +19,10 @@ I built this as my first AWS project while learning cloud fundamentals, aiming a
 - Runs on a schedule as an AWS Lambda function and sends alerts through SNS
 - Stores findings history in S3 and queries it with Glue and Athena to track trends and time to remediation
 
-<!--
-SCREENSHOT TODO (private, delete this comment block when done):
-The rendered HTML report opened in a browser.
-Save as docs/screenshots/html-report.png, then uncomment the line below.
-![HTML report](docs/screenshots/html-report.png)
--->
+The HTML report, with the account ID masked to its last four digits:
+
+![HTML report with two findings](docs/screenshots/html-report1.png)
+![HTML report after fixing one finding](docs/screenshots/html-report2.png)
 
 ## Architecture
 
@@ -84,25 +82,20 @@ flowchart TD
 - **No secrets in the repo.** Credentials live in the local AWS CLI profile. `.gitignore` excludes `*.csv` and generated reports.
 - **Test before trusting.** A check that returns nothing could mean "clean" or "broken", so each check was verified against a deliberately bad resource first.
 
-<!--
-SCREENSHOT TODO (private, delete this comment block when done):
-(a) IAM console > audit user > Permissions tab showing exactly ONE policy attached.
-(b) Terminal: `aws iam list-users` succeeding, then `aws s3 mb ...` returning AccessDenied.
-Save as docs/screenshots/least-privilege.png, then uncomment the line below.
-![Least-privilege proof](docs/screenshots/least-privilege.png)
--->
+The read-only policy, the audit user, and proof that a write attempt is denied under the audit profile:
+
+![Least-privilege policy](docs/screenshots/least-privilege-policy.png)
+![Audit IAM user](docs/screenshots/least-privilege-user.png)
+![Write attempt returns AccessDenied](docs/screenshots/access-denied.png)
+
+A budget alert guards against surprise charges in the sandbox account:
+
+![AWS Budgets](docs/screenshots/budgets.png)
 
 ## Checks
 
 ### IAM credential report
 Uses `generate_credential_report` and `get_credential_report`, which cover every IAM user and the root account in one call. Flags users without MFA and access keys past the age threshold (default 90 days) or unused.
-
-<!--
-SCREENSHOT TODO (private, delete this comment block when done):
-Terminal output of the credential report findings (MFA / key age).
-Save as docs/screenshots/credential-report.png, then uncomment the line below.
-![Credential report findings](docs/screenshots/credential-report.png)
--->
 
 ### IAM policies
 Excess access can hide in three places, and all three are checked:
@@ -110,12 +103,7 @@ Excess access can hide in three places, and all three are checked:
 - Customer-managed policies with `Action: *` on `Resource: *`
 - Inline user policies with the same wildcard pattern
 
-<!--
-SCREENSHOT TODO (private, delete this comment block when done):
-Terminal findings for the wildcard policy, side by side with the IAM console showing that policy attached to the test user.
-Save as docs/screenshots/iam-policies.png, then uncomment the line below.
 ![IAM policy findings](docs/screenshots/iam-policies.png)
--->
 
 ### S3 public exposure
 Buckets can be exposed three independent ways, so each bucket is checked for:
@@ -123,14 +111,7 @@ Buckets can be exposed three independent ways, so each bucket is checked for:
 - A bucket policy that AWS reports as public
 - An ACL granting access to `AllUsers` or `AuthenticatedUsers`
 
-<!--
-SCREENSHOT TODO (private, delete this comment block when done):
-(a) Terminal with the 3 findings + S3 console Permissions tab showing the "Public" label.
-(b) Clean run after cleanup, showing the bucket no longer flagged.
-Save as docs/screenshots/s3-public.png and docs/screenshots/s3-clean.png, then uncomment the lines below.
 ![S3 findings](docs/screenshots/s3-public.png)
-![S3 clean run](docs/screenshots/s3-clean.png)
--->
 
 ### Security groups
 Flags inbound rules open to `0.0.0.0/0` or `::/0`:
@@ -139,22 +120,15 @@ Flags inbound rules open to `0.0.0.0/0` or `::/0`:
 
 Security groups are regional, so this check covers the region set in the profile.
 
-<!--
-SCREENSHOT TODO (private, delete this comment block when done):
-Terminal with the High (port 22) and Medium (port 8080) findings + EC2 console Inbound rules tab showing the 0.0.0.0/0 rules.
-Save as docs/screenshots/security-groups.png, then uncomment the line below.
 ![Security group findings](docs/screenshots/security-groups.png)
--->
 
 ### CloudTrail
 Flags accounts with no trail, no multi-region trail, or a trail that is not actively logging. Without an audit log, the other findings cannot be investigated after the fact.
 
-<!--
-SCREENSHOT TODO (private, delete this comment block when done):
-Finding when logging is stopped or absent + CloudTrail console showing the trail status. Then the clean run.
-Save as docs/screenshots/cloudtrail.png, then uncomment the line below.
-![CloudTrail findings](docs/screenshots/cloudtrail.png)
--->
+No trail at all, then a trail that exists but has logging stopped:
+
+![No CloudTrail trail](docs/screenshots/cloudtrail-no-trail.png)
+![CloudTrail logging stopped](docs/screenshots/cloudtrail-logging-stopped.png)
 
 ## Setup
 
@@ -183,40 +157,37 @@ Run the tests:
 pytest
 ```
 
-<!--
-SCREENSHOT TODO (private, delete this comment block when done):
-(a) `pytest` output with all tests passing.
-(b) GitHub Actions tab showing a green run.
-Save as docs/screenshots/tests-passing.png and docs/screenshots/ci-green.png, then uncomment the lines below.
+![CLI help](docs/screenshots/cli-help.png)
+![Exit code 2 with --fail-on High](docs/screenshots/cli-fail-on.png)
+![Filtering with --min-severity and --quiet](docs/screenshots/cli-min-severity.png)
+
+All 34 tests pass locally, and GitHub Actions runs them on Python 3.12 and 3.13 for every push:
+
 ![Tests passing](docs/screenshots/tests-passing.png)
 ![CI green](docs/screenshots/ci-green.png)
--->
+![CI badge in the repo README](docs/screenshots/ci-badge.png)
 
 ## Automation
 
 The audit runs weekly as an AWS Lambda function triggered by an EventBridge schedule. Each run sends a summary through SNS and writes its findings to S3.
 
-<!--
-SCREENSHOT TODO (private, delete this comment block when done):
-(a) EventBridge rule showing the weekly schedule.
-(b) CloudWatch Logs from a scheduled run, with the timestamp visible.
-(c) The SNS alert email (blur your email address).
-Save as docs/screenshots/eventbridge.png, docs/screenshots/cloudwatch-run.png, docs/screenshots/sns-alert.png, then uncomment the lines below.
+The schedule is every Monday at 14:00 UTC. The Lambda role has the same read-only policy plus permission to publish alerts:
+
 ![EventBridge schedule](docs/screenshots/eventbridge.png)
-![Scheduled run logs](docs/screenshots/cloudwatch-run.png)
-![SNS alert](docs/screenshots/sns-alert.png)
--->
+![Lambda role policies](docs/screenshots/lambda-role-policies.png)
+![SNS alert email](docs/screenshots/sns-alert.png)
 
 ## Analytics
 
 Every run appends its findings to S3, partitioned by date. Glue catalogs the data and Athena answers questions such as findings per category over time, which issues keep recurring, and how long a resource stayed non-compliant before it was fixed.
 
-<!--
-SCREENSHOT TODO (private, delete this comment block when done):
-Athena query editor showing a trend query and its results (findings per week, time to remediation).
-Save as docs/screenshots/athena-trends.png, then uncomment the line below.
-![Athena trend query](docs/screenshots/athena-trends.png)
--->
+Each run writes a findings file and a run summary under date partitions:
+
+![Findings history in S3](docs/screenshots/s3-findings-history.png)
+
+Athena result for resolved findings and mean time to remediation:
+
+![Athena time to remediation](docs/screenshots/athena-remediation.png)
 
 ## Sample output
 
@@ -238,6 +209,10 @@ The tool flags my own admin user for having `AdministratorAccess` attached direc
 - **Findings not printing.** I appended the S3 findings after the print loop, so they never appeared. Fix: run every check first, then print.
 - **CLI profile names are case-sensitive.** `Sai-Admin` and `sai-admin` are different profiles.
 - **Placeholders in PowerShell.** Angle brackets in a command like `<policy-arn>` are redirection operators, not placeholders.
+- **moto did not behave like real AWS.** It does not load AWS-managed policies, and `get_bucket_policy_status` can omit `IsPublic`. I built test policies inside moto and made the S3 check use safe lookups, with a regression test for the missing field. The first S3 test run failed (4 tests) before this fix.
+- **Lambda handler name and timeout.** The handler had to be set to `lambda_handler.handler`, and the default 3-second timeout was too short, so I raised it to 60 seconds.
+- **Region mismatch.** Lambda and SNS were created in `eu-north-1` while I was running commands against `us-east-1`. Resources and CLI commands have to use the same region.
+- **Environment variable format.** `FINDINGS_BUCKET` needs the bucket name, not the ARN.
 
 ## Possible extensions
 
