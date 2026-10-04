@@ -207,7 +207,6 @@ The tool flags my own admin user for having `AdministratorAccess` attached direc
 
 - **Wrong IAM action name.** I used `s3:GetPublicAccessBlock`; the real action is `s3:GetBucketPublicAccessBlock`. IAM matches names exactly, so the S3 check failed with `AccessDenied` until I fixed the policy. I confirmed the fix by re-running the check.
 - **Findings not printing.** I appended the S3 findings after the print loop, so they never appeared. Fix: run every check first, then print.
-- **CLI profile names are case-sensitive.** `Sai-Admin` and `sai-admin` are different profiles.
 - **Placeholders in PowerShell.** Angle brackets in a command like `<policy-arn>` are redirection operators, not placeholders.
 - **moto did not behave like real AWS.** It does not load AWS-managed policies, and `get_bucket_policy_status` can omit `IsPublic`. I built test policies inside moto and made the S3 check use safe lookups, with a regression test for the missing field. The first S3 test run failed (4 tests) before this fix.
 - **Lambda handler name and timeout.** The handler had to be set to `lambda_handler.handler`, and the default 3-second timeout was too short, so I raised it to 60 seconds.
